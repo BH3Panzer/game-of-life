@@ -5,13 +5,13 @@ use crate::CELL_SIZE;
 pub struct Cell {
     alive: bool,
     alive_next: bool,
-    x: i32,
-    y: i32,
+    x: f32,
+    y: f32,
     alive_neighbours: u8
 }
 
 impl Cell {
-    pub fn new(x: i32, y: i32, alive: bool) -> Cell {
+    pub fn new(x: f32, y: f32, alive: bool) -> Cell {
         Cell {
             alive: alive,
             alive_next: alive,
@@ -21,16 +21,16 @@ impl Cell {
         }
     }
 
-    pub fn draw(&mut self, d: &mut raylib::core::drawing::RaylibDrawHandle) {
-        let mut color : Color = Color::RAYWHITE;
+    pub fn draw(&mut self, d: &mut raylib::core::drawing::RaylibDrawHandle, cam_x: f32, cam_y: f32, cam_zoom: f32) {
+        let mut color : Color = Color::BLACK;
         let mouse_pos = d.get_mouse_position();
         
         if self.alive {
-            color = Color::BLACK;
+            color = Color::RAYWHITE;
         }
         // Check if the mouse is over the cell
-        if mouse_pos.x >= self.x as f32 * CELL_SIZE as f32 && mouse_pos.x < self.x as f32 * CELL_SIZE as f32 + CELL_SIZE as f32 && mouse_pos.y >= self.y as f32 * CELL_SIZE as f32 && mouse_pos.y < self.y as f32 * CELL_SIZE as f32 + CELL_SIZE as f32 {
-            color = Color::BLUE;
+        if mouse_pos.x + cam_x >= self.x as f32 * CELL_SIZE as f32 * cam_zoom && mouse_pos.x + cam_x < self.x as f32 * CELL_SIZE as f32 * cam_zoom + CELL_SIZE as f32 * cam_zoom && mouse_pos.y + cam_y >= self.y as f32 * CELL_SIZE as f32 * cam_zoom && mouse_pos.y + cam_y < self.y as f32 * CELL_SIZE as f32 * cam_zoom + CELL_SIZE as f32 * cam_zoom {
+            color = Color::CYAN;
             if d.is_mouse_button_down(MouseButton::MOUSE_BUTTON_LEFT) {
                 self.alive = true;
                 color = Color::LIGHTGREEN;
@@ -39,8 +39,8 @@ impl Cell {
                 color = Color::ORANGE;
             }
         }
-        if self.x*CELL_SIZE <= d.get_screen_width() as i32 && self.y*CELL_SIZE <= d.get_screen_height() as i32 {
-            d.draw_rectangle(self.x * CELL_SIZE, self.y * CELL_SIZE, CELL_SIZE, CELL_SIZE, color);
+        if self.x*CELL_SIZE as f32 <= d.get_screen_width() as f32 && self.y*CELL_SIZE as f32 <= d.get_screen_height() as f32 {
+            d.draw_rectangle(self.x as i32 * CELL_SIZE * cam_zoom as i32 - cam_x as i32, self.y as i32 * CELL_SIZE * cam_zoom as i32 - cam_y as i32, CELL_SIZE * cam_zoom as i32, CELL_SIZE * cam_zoom as i32,color);
         }
         
         

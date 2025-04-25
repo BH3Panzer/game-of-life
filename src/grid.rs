@@ -1,11 +1,12 @@
 
+
 use crate::{cell::Cell, GRID_SIZE};
 
 pub struct Grid {
     pub cells: Vec<Cell>,
     number_of_alive_cells: u32,
     number_of_dead_cells: u32,
-    number_of_cells: u32
+    number_of_cells: u32,
 }
 
 impl Grid {
@@ -14,22 +15,22 @@ impl Grid {
             cells: Vec::new(),
             number_of_alive_cells: 0,
             number_of_dead_cells: 0,
-            number_of_cells: 0
+            number_of_cells: 0,
         }
     }
     pub fn fill_with_cells(&mut self, size: i32, alives: bool) {
         self.cells.clear();
         for x in 0..size {
             for y in 0..size {
-                self.cells.push(Cell::new(x, y, alives));
+                self.cells.push(Cell::new(x as f32, y as f32, alives));
             }
         }
     }
 
 
-    pub fn draw(&mut self, d: &mut raylib::core::drawing::RaylibDrawHandle) {
+    pub fn draw(&mut self, d: &mut raylib::core::drawing::RaylibDrawHandle, cam_x: f32, cam_y: f32, cam_zoom: f32) {
         for cell in self.cells.iter_mut() {
-            cell.draw(d);
+            cell.draw(d, cam_x, cam_y, cam_zoom);
         }
     }
 

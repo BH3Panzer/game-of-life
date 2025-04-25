@@ -1,10 +1,11 @@
 use raylib::prelude::*;
 mod cell;
 mod grid;
+mod kamera;
 
-const GRID_SIZE: i32 = 200;
+const GRID_SIZE: i32 = 250;
 
-const CELL_SIZE: i32 = 10;
+const CELL_SIZE: i32 = 2;
 
 
 fn main() {
@@ -14,14 +15,18 @@ fn main() {
         .build();
     
     rl.toggle_fullscreen();
-    let mut grid = grid::Grid::new();
+    let mut camera: kamera::Kamera = kamera::Kamera::new();
+    camera.set_position(-rl.get_screen_width() as f32 / 3.0, -rl.get_screen_height() as f32 / 3.0);
+    let mut grid: grid::Grid = grid::Grid::new();
     let mut frame: u32 = 0;
     let mut iteration: u32 = 0;
     let mut paused: bool = true;
     let mut speed: u8 = 1;
+    let mut dt: f32;
     grid.fill_with_cells(GRID_SIZE, false);
     while !rl.window_should_close() {
         frame += 1;
+        dt = rl.get_frame_time();
         if rl.is_key_pressed(KeyboardKey::KEY_SPACE) {
             paused = !paused;
         }
@@ -36,6 +41,33 @@ fn main() {
         } else if rl.is_key_pressed(KeyboardKey::KEY_FIVE) {
             speed = 1;
         }
+        if rl.is_key_down(KeyboardKey::KEY_W) {
+            camera.translate(0 as f32 * dt, -500 as f32 *dt);
+        }
+        if rl.is_key_down(KeyboardKey::KEY_S) {
+            camera.translate(0 as f32 * dt, 500 as f32 * dt);
+        }
+        if rl.is_key_down(KeyboardKey::KEY_A) {
+            camera.translate(-500 as f32 * dt, 0 as f32 * dt);
+        }
+        if rl.is_key_down(KeyboardKey::KEY_D) {
+            camera.translate(500 as f32 * dt, 0 as f32 * dt);
+        }
+        if rl.get_mouse_wheel_move() > 0.0 {
+            camera.change_zoom(1.0);
+            camera.translate(rl.get_mouse_position().x as f32 / 3.0, rl.get_mouse_position().y as f32 / 3.0);
+        } else if rl.get_mouse_wheel_move() < 0.0 {
+            if camera.get_zoom() > 1.0 {
+                camera.change_zoom(-1.0);
+                camera.translate(-rl.get_mouse_position().x as f32 / 3.0, -rl.get_mouse_position().y as f32 / 3.0);
+            }
+        }
+
+        if rl.is_mouse_button_pressed(MouseButton::MOUSE_BUTTON_MIDDLE) {
+            camera.set_position(-rl.get_screen_width() as f32 / 3.0, -rl.get_screen_height() as f32 / 3.0);
+        }
+
+
         if !paused {
             if frame % speed as u32 == 0 {
                 grid.calculate_next_iteration();
@@ -55,9 +87,9 @@ fn main() {
         }
         let mut d = rl.begin_drawing(&thread);
 
-        d.clear_background(Color::RAYWHITE);
+        d.clear_background(Color::GHOSTWHITE);
 
-        grid.draw(&mut d);
+        grid.draw(&mut d, camera.get_x(), camera.get_y(), camera.get_zoom());
 
         d.draw_fps(0, 0);
 
